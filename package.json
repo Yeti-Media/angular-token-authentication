@@ -1,0 +1,43 @@
+{
+  "name": "angular-token-authentication",
+  "version": "0.0.0",
+  "description": "Collection of angular services for token-based authentication.",
+  "main": "index.js",
+  "directories": {
+    "test": "test"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "karma": "~0.10.9",
+    "karma-chrome-launcher": "~0.1.2",
+    "karma-coffee-preprocessor": "~0.1.2",
+    "karma-firefox-launcher": "~0.1.3",
+    "karma-html2js-preprocessor": "~0.1.0",
+    "karma-jasmine": "~0.1.5",
+    "karma-phantomjs-launcher": "~0.1.1",
+    "karma-requirejs": "~0.2.1",
+    "karma-script-launcher": "~0.1.0",
+    "requirejs": "~2.1.10"
+  },
+  "scripts": {
+    "test": "node_modules/karma/bin/karma start"
+  },
+  "repository": {
+    "type": "git",
+    "url": "http://github.com/Yeti-Media/angular-token-authentication"
+  },
+  "keywords": [
+    "angular",
+    "token",
+    "authentication",
+    "auth",
+    "resource",
+    "cors"
+  ],
+  "author": "Juan Pablo Kaniefsky",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/Yeti-Media/angular-token-authentication/issues"
+  },
+  "homepage": "https://github.com/Yeti-Media/angular-token-authentication"
+}
