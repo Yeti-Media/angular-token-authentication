@@ -11,8 +11,8 @@ describe("$tokenAuthResource", function() {
   beforeEach(function() {
     module("tokenAuthentication");
     module(function($provide) {
-      $provide.value("$tokenHandler", {
-        get: function() {
+      $provide.value("$sessionHandler", {
+        getAccessToken: function() {
           return token;
         }
       });

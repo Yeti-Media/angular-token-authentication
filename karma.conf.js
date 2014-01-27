@@ -19,7 +19,7 @@ module.exports = function(config) {
       'bower_components/angular-mocks/angular-mocks.js',
       'bower_components/angular-cookies/angular-cookies.js',
       'lib/tokenAuthentication.js',
-      'lib/tokenAuthentication/*.js',
+      'lib/sessionHandler.js',
       'lib/tokenAuthResource.js',
       'test/specs/**/*.js'
     ],

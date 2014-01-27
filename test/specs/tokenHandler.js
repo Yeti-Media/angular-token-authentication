@@ -1,4 +1,4 @@
-describe("$tokenHandler", function() {
+/*describe("$tokenHandler", function() {
 
   var handler, cookies, scope;
 
@@ -111,4 +111,4 @@ describe("$tokenHandler", function() {
       expect(cookies.tokenAuth_another).toBeDefined();
     });
   });
-});
+});*/
