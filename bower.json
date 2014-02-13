@@ -14,15 +14,8 @@
   ],
   "license": "MIT",
   "homepage": "https://github.com/Yeti-Media/angular-token-authentication.git",
-  "ignore": [
-    "**/.*",
-    "node_modules",
-    "bower_components",
-    "test",
-    "tests"
-  ],
+  "main": "angular-token-authentication.js",
   "dependencies": {
-    "angular-cookies": "~1.2.9",
     "angular-resource": "~1.2.9"
   },
   "devDependencies": {

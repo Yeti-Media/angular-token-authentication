@@ -1,4 +1,4 @@
-describe("$tokenAuthResource", function() {
+describe("tokenAuthResource", function() {
 
   var resource, scope, httpBackend,
       tokenKey = "whatever",
@@ -11,21 +11,23 @@ describe("$tokenAuthResource", function() {
   beforeEach(function() {
     module("tokenAuthentication");
     module(function($provide) {
-      $provide.value("$sessionHandler", {
+      $provide.value("tokenAuthParams", {accessTokenKey: tokenKey});
+      $provide.value("sessionHandler", {
         getAccessToken: function() {
           return token;
+        },
+        checkExpiration: function() {
+          return false;
         }
       });
     });
     module("tokenAuthResource");
 
-    inject(function($tokenAuthResource, $rootScope, $httpBackend) {
-      resource = $tokenAuthResource;
+    inject(function(tokenAuthResource, $rootScope, $httpBackend) {
+      resource = tokenAuthResource;
       scope = $rootScope;
       httpBackend = $httpBackend;
     });
-
-    scope.tokenAuthParams.accessTokenKey = tokenKey;
   });
 
   it("includes access token with all default actions", function() {
