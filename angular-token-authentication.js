@@ -12,47 +12,51 @@ tokenAuthentication.value("tokenAuthParams", {
 
 tokenAuthentication.factory("sessionHandler", 
   ["$rootScope", "$window", "tokenAuthParams", function($scope, $window, tokenAuthParams) {
-    var getKey = function(key) {
+    var accessTokenKey = "accessToken",
+    storage = $window.sessionStorage,
+    getKey = function(key) {
       return "tokenAuth_" + key;
     },
-    accessTokenKey = "accessToken",
-    expirationKey = getKey("expiration"),
-    storage = $window.sessionStorage,
-    instance = {
-      keys: {},
+    setValue = function(key, value, remember) {
+      var values = storage.tokenAuth_session ? JSON.parse(storage.tokenAuth_session) : {};
 
-      loggedIn: function() {
-        return storage[getKey(accessTokenKey)] ? true : false;
+      values[key] = {value: value, remember: remember || false};
+      storage.tokenAuth_session = JSON.stringify(values);
+    },
+    instance = {
+      empty: function() {
+        return storage.tokenAuth_session === "{}";
       },
 
       setValue: function(key, value, remember) {
-        storage[getKey(key)] = value;
-        if (angular.equals(this.keys, {})) {
+        if (this.empty()) {
           this.setExpiration();
           this.setIdleTimer();
         }
-        this.keys[key] = remember;
+        setValue(key, value, remember);
         if (key === accessTokenKey)
           $scope.$broadcast("tokenAuth:loggedIn");
       },
 
       setValues: function(data) {
-        var self = this;
+        var values = JSON.parse(storage.tokenAuth_session);
 
         angular.forEach(data, function(value, key) {
-          if (typeof value === "object")
-            self.setValue(key, value.value, value.remember);
-          else
-            self.setValue(key, value);
+          if (typeof value != "object" || !value.hasOwnProperty("value"))
+            value = {value: value, remember: false};
+          values[key] = value;
         });
+
+        storage.tokenAuth_session = JSON.stringify(values);
       },
 
       getValue: function(key) {
-        return storage[getKey(key)];
+        var value = JSON.parse(storage.tokenAuth_session)[key];
+        return value ? value.value : null;
       },
 
       setAccessToken: function(token, remember) {
-        this.setValue(getKey(accessTokenKey), token, remember);
+        this.setValue(accessTokenKey, token, remember);
       },
 
       getAccessToken: function() {
@@ -65,14 +69,13 @@ tokenAuthentication.factory("sessionHandler",
         if (!duration) return;
 
         date.setMinutes(date.getMinutes() + duration);
-        storage[expirationKey] = date.getTime().toString();
-        this.keys.expiration = false;
+        storage.tokenAuth_expiration = date.getTime().toString();
       },
 
       checkExpiration: function() {
         var date = new Date();
 
-        if (storage[expirationKey] && parseInt(storage[expirationKey], 10) < date.getTime()) {
+        if (storage.tokenAuth_expiration && parseInt(storage.tokenAuth_expiration, 10) < date.getTime()) {
           this.clean();
           return true;
         } else {
@@ -108,22 +111,26 @@ tokenAuthentication.factory("sessionHandler",
 
       clean: function(force) {
         var self = this,
-        keys = angular.copy(this.keys);
+        values = JSON.parse(storage.tokenAuth_session);
 
-        angular.forEach(keys, function(remember, key) {
-          if (force || !remember) {
-            delete storage[getKey(key)];
-            delete self.keys[key];
+        angular.forEach(values, function(data, key) {
+          if (force || !data.remember) {
+            delete values[key];
             if (key === accessTokenKey) 
               $scope.$broadcast("tokenAuth:loggedOut");
           }
         });
+        storage.tokenAuth_session = JSON.stringify(values);
+        delete storage.tokenAuth_expiration;
         if (this.idleInterval)
           clearInterval(this.idleInterval);
       }
     };
 
     $scope.$on("tokenAuth:logout", instance.clean);
+
+    if (!storage.tokenAuth_session)
+      storage.tokenAuth_session = "{}";
 
     return instance;
   }]
@@ -147,14 +154,16 @@ angular.module("tokenAuthResource", ["ngResource", "tokenAuthentication"]).facto
 
         resource[action] = function() {
           var args = Array.prototype.slice.call(arguments);
-          if (sessionHandler.checkExpiration()) return;
 
-          if (args.length === 0)
-            args.push({});
-          else if (typeof args[0] !== "object")
-            args[0] = {};
+          if (!sessionHandler.checkExpiration()) {
+            if (args.length === 0)
+              args.push({});
+            else if (typeof args[0] !== "object")
+              args.unshift({});
 
-          args[0][tokenAuthParams.accessTokenKey] = sessionHandler.getAccessToken();
+            args[0][tokenAuthParams.accessTokenKey] = sessionHandler.getAccessToken();
+          }
+
           original.apply(this, args);
         };
       });

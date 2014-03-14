@@ -24,23 +24,9 @@ describe("sessionHandler", function() {
     expect(handler).toBeTruthy();
   });
 
-  describe("loggedIn()", function() {
-    it("returns true if accessToken is set", function() {
-      storage.tokenAuth_accessToken = "a1";
-
-      expect(handler().loggedIn()).toEqual(true);
-    });
-
-    it("returns false if accessToken is not set", function() {
-      delete storage.tokenAuth_accessToken;
-
-      expect(handler().loggedIn()).toEqual(false);
-    });
-  });
-
   describe("getValue()", function() {
     it("works", function() {
-      storage.tokenAuth_whatever = "whatever";
+      storage.tokenAuth_session = JSON.stringify({whatever: {value: "whatever"}});
 
       expect(handler().getValue("whatever")).toEqual("whatever");
     });
@@ -56,7 +42,7 @@ describe("sessionHandler", function() {
       };
       h.setValue("whatever", "whatever");
 
-      expect(storage.tokenAuth_whatever).toEqual("whatever");
+      expect(JSON.parse(storage.tokenAuth_session).whatever).toEqual({value: "whatever", remember: false});
       expect(setExpirationCalled).toEqual(true);
     });
 
@@ -125,38 +111,49 @@ describe("sessionHandler", function() {
   });
 
   describe("clean()", function() {
-    var h;
+    var h, values;
 
     beforeEach(function() {
       h = handler();
 
-      h.keys.a = false;
-      h.keys.b = true;
-      h.keys.c = false;
-      h.keys.d = true;
-      storage.tokenAuth_a = "1";
-      storage.tokenAuth_b = "2";
-      storage.tokenAuth_c = "3";
-      storage.tokenAuth_d = "4";
+      storage.tokenAuth_session = JSON.stringify({
+        a: {
+          value: 1,
+          remember: false
+        },
+        b: {
+          value: 2,
+          remember: true
+        },
+        c: {
+          value: 3,
+          remember: false
+        },
+        d: {
+          value: 4,
+          remember: true
+        }
+      });
     });
 
     it("removes all non remembered values by default", function() {
-
       h.clean();
+      values = JSON.parse(storage.tokenAuth_session);
 
-      expect(storage.tokenAuth_a).toBeUndefined();
-      expect(storage.tokenAuth_b).toBeDefined();
-      expect(storage.tokenAuth_c).toBeUndefined();
-      expect(storage.tokenAuth_d).toBeDefined();
+      expect(values.a).toBeUndefined();
+      expect(values.b).toBeDefined();
+      expect(values.c).toBeUndefined();
+      expect(values.d).toBeDefined();
     });
 
     it("removes all values when forced", function() {
       h.clean(true);
+      values = JSON.parse(storage.tokenAuth_session);
 
-      expect(storage.tokenAuth_a).toBeUndefined();
-      expect(storage.tokenAuth_b).toBeUndefined();
-      expect(storage.tokenAuth_c).toBeUndefined();
-      expect(storage.tokenAuth_d).toBeUndefined();
+      expect(values.a).toBeUndefined();
+      expect(values.b).toBeUndefined();
+      expect(values.c).toBeUndefined();
+      expect(values.d).toBeUndefined();
     });
   });
 });
