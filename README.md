@@ -81,7 +81,7 @@ A wrapped version of the [angular-resource](http://docs.angularjs.org/api/ngReso
 Install:
 
 ```sh
-bower install angular-token-authentication
+bower install angular-token-authentication --save
 ```
 
 Include the files, load the modules on the app and set parameters:
