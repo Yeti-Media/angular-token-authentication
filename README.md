@@ -16,10 +16,6 @@ Handles the session values and their expiration.
 
 API is as follows:
 
-#### loggedIn()
-
-Returns `true` if the access token is defined.
-
 #### getValue(key)
 - key: String (required)
 
