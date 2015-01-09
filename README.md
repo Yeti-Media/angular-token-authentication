@@ -1,5 +1,9 @@
 Angular token authentication are services for handling token-based authentication as a client-side session with automatic (optional) handling of REST resources in angular apps. It is divided in two modules.
 
+ 
+![codeship](https://codeship.com/projects/5e91d1a0-7a84-0132-7c8e-5ed8b09d11ae/status?branch=master)
+
+
 # Parameters
 
 - `sessionDuration`: duration of the session (in minutes). A falsy value (`0`, `false`) means the session will not expire. Default: `30`
