@@ -7,12 +7,12 @@ var tokenAuthentication = angular.module("tokenAuthentication", ["ngCookies"]);
 tokenAuthentication.value("tokenAuthParams", {
   sessionDuration: 30, // in minutes
   idleTime: 20, //in minutes
-  accessTokenKey: "accessToken"
+  accessTokenKey: "access_token"
 });
 
 tokenAuthentication.factory("sessionHandler", 
   ["$rootScope", "$window", "tokenAuthParams", function($scope, $window, tokenAuthParams) {
-    var accessTokenKey = "accessToken",
+    var accessTokenKey = "access_token",
     storage = $window.sessionStorage,
     getKey = function(key) {
       return "tokenAuth_" + key;
