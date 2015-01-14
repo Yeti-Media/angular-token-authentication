@@ -1,6 +1,6 @@
 {
   "name": "angular-token-authentication",
-  "version": "0.0.0",
+  "version": "0.1.1",
   "description": "Collection of angular services for token-based authentication.",
   "main": "index.js",
   "directories": {

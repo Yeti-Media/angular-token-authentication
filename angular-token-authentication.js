@@ -150,6 +150,15 @@ angular.module("tokenAuthResource", ["ngResource", "tokenAuthentication"]).facto
               actions.push(key);
             });
           }
+          if (arguments.length > 2 && !sessionHandler.checkExpiration()) {
+            angular.forEach(arguments[2], function(action) {
+              action.headers = {
+                Authorization: function() {
+                  return "Bearer " + sessionHandler.getAccessToken();
+                }
+              };
+            });
+          }
           this.wrapActions(resource, actions);
           return resource;
         },
@@ -166,8 +175,7 @@ angular.module("tokenAuthResource", ["ngResource", "tokenAuthentication"]).facto
                   args.push({});
                 else if (typeof args[0] !== "object")
                   args.unshift({});
-
-                args[0][tokenAuthParams.accessTokenKey] = sessionHandler.getAccessToken();
+                
               }
 
               return original.apply(resource, args);

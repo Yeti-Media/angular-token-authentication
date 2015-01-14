@@ -52,5 +52,5 @@ module.exports = function(grunt) {
     });
   });
 
-  grunt.registerTask("default", ["test", "jshint:beforeConcat", "concat", "jshint:afterConcat", "uglify"]);
+  grunt.registerTask("default", [ "jshint:beforeConcat", "concat", "jshint:afterConcat", "uglify"]);
 };
