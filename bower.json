@@ -1,8 +1,8 @@
 {
   "name": "angular-token-authentication",
-  "version": "0.0.0",
+  "version": "0.1.1",
   "authors": [
-    "Juan Pablo Kaniefsky <jpkaniefsky@gmail.com>"
+    "Nick Treadway, <rnt@yeti-media.com>, Juan Pablo Kaniefsky <jpkaniefsky@gmail.com>"
   ],
   "description": "Collection of angular services for token-based authentication.",
   "keywords": [
@@ -16,7 +16,8 @@
   "homepage": "https://github.com/Yeti-Media/angular-token-authentication.git",
   "main": "angular-token-authentication.js",
   "dependencies": {
-    "angular-resource": "~1.2.9"
+    "angular-resource": "~1.2.9",
+    "angular-cookies": "~1.2.14"
   },
   "devDependencies": {
     "angular-mocks": "~1.2.14",
