@@ -18,6 +18,7 @@ module.exports = function(config) {
       'bower_components/angular-resource/angular-resource.js',
       'bower_components/angular-mocks/angular-mocks.js',
       'bower_components/angular-cookies/angular-cookies.js',
+      'bower_components/angular-jwt/dist/angular-jwt.js',
       'lib/tokenAuthentication.js',
       'lib/sessionHandler.js',
       'lib/tokenAuthResource.js',
@@ -27,7 +28,7 @@ module.exports = function(config) {
 
     // list of files to exclude
     exclude: [
-      
+
     ],
 
 

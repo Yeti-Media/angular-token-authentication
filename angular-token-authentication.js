@@ -2,17 +2,19 @@
 
 "use strict";
 
-var tokenAuthentication = angular.module("tokenAuthentication", ["ngCookies"]);
+var tokenAuthentication = angular.module("tokenAuthentication", ["angular-jwt"]);
 
 tokenAuthentication.value("tokenAuthParams", {
-  sessionDuration: 30, // in minutes
-  idleTime: 20, //in minutes
-  accessTokenKey: "access_token"
+  sessionDuration: 0, // in minutes
+  idleTime: 0, //in minutes
+  accessTokenKey: "accessToken",
+  jwt: false
 });
 
-tokenAuthentication.factory("sessionHandler", 
-  ["$rootScope", "$window", "tokenAuthParams", function($scope, $window, tokenAuthParams) {
-    var accessTokenKey = "access_token",
+
+angular.module("tokenAuthentication").factory("sessionHandler",
+  ["$rootScope", "$window", "tokenAuthParams", function($scope, $window, tokenAuthParams, jwtHelper) {
+    var accessTokenKey = "accessToken",
     storage = $window.sessionStorage,
     getKey = function(key) {
       return "tokenAuth_" + key;
@@ -29,13 +31,16 @@ tokenAuthentication.factory("sessionHandler",
       },
 
       setValue: function(key, value, remember) {
-        if (this.empty()) {
+        if (key === accessTokenKey) {
+          this.setExpiration(value);
+          this.setIdleTimer();
+          $scope.$broadcast("tokenAuth:loggedIn");
+          value = value.access_token;
+        } else if (this.empty()) {
           this.setExpiration();
           this.setIdleTimer();
         }
         setValue(key, value, remember);
-        if (key === accessTokenKey)
-          $scope.$broadcast("tokenAuth:loggedIn");
       },
 
       setValues: function(data) {
@@ -63,13 +68,32 @@ tokenAuthentication.factory("sessionHandler",
         return this.getValue(accessTokenKey);
       },
 
-      setExpiration: function() {
-        var date = new Date(),
-        duration = tokenAuthParams.sessionDuration;
-        if (!duration) return;
+      setExpiration: function(token) {
+        var duration = tokenAuthParams.sessionDuration,
+        expiresAt,
+        clientExpiration;
 
-        date.setMinutes(date.getMinutes() + duration);
-        storage.tokenAuth_expiration = date.getTime().toString();
+        if (token) {
+          if (tokenAuthParams.jwt) {
+            expiresAt = jwtHelper.getTokenExpirationDate(token);
+          } else if (token.expires_in) {
+            expiresAt = new Date();
+            // 60 seconds less to secure browser and response latency
+            expiresAt.setSeconds(expiresAt.getSeconds() + parseInt(token.expires_in) - 60);
+          }
+        }
+
+        if (duration) {
+          clientExpiration = new Date();
+          clientExpiration.setMinutes(clientExpiration.getMinutes() + duration);
+          if (!expiresAt || clientExpiration.getTime() < expiresAt.getTime()) {
+            expiresAt = clientExpiration;
+          }
+        }
+
+        if (expiresAt) {
+          storage.tokenAuth_expiration = expiresAt.getTime().toString();
+        }
       },
 
       checkExpiration: function() {
@@ -116,7 +140,7 @@ tokenAuthentication.factory("sessionHandler",
         angular.forEach(values, function(data, key) {
           if (force || !data.remember) {
             delete values[key];
-            if (key === accessTokenKey) 
+            if (key === accessTokenKey)
               $scope.$broadcast("tokenAuth:loggedOut");
           }
         });
@@ -136,7 +160,8 @@ tokenAuthentication.factory("sessionHandler",
   }]
 );
 
-angular.module("tokenAuthResource", ["ngResource", "tokenAuthentication"]).factory("tokenAuthResource", 
+
+angular.module("tokenAuthResource", ["ngResource", "tokenAuthentication"]).factory("tokenAuthResource",
   ["$resource", "sessionHandler", "tokenAuthParams", function($resource, sessionHandler, tokenAuthParams) {
     return function() {
       var resource = $resource.apply(this, arguments),
@@ -162,14 +187,15 @@ angular.module("tokenAuthResource", ["ngResource", "tokenAuthentication"]).facto
               args.unshift({});
 
             args[0][tokenAuthParams.accessTokenKey] = sessionHandler.getAccessToken();
-          }
 
-          original.apply(this, args);
+            original.apply(this, args);
+          }
         };
       });
 
       return resource;
     };
 }]);
+
 
 })();
