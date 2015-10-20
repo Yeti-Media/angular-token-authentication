@@ -1,14 +1,15 @@
-Angular token authentication are services for handling token-based authentication as a client-side session with automatic (optional) handling of REST resources in angular apps. It is divided in two modules.
+Angular token authentication are services for handling token-based authentication as a client-side session with automatic (optional) handling of REST resources in angular apps. It supports the usage of [jwt](https://jwt.io) tokens. It is divided in two modules.
 
- 
+
 ![codeship](https://codeship.com/projects/5e91d1a0-7a84-0132-7c8e-5ed8b09d11ae/status?branch=master)
 
 
 # Parameters
 
-- `sessionDuration`: duration of the session (in minutes). A falsy value (`0`, `false`) means the session will not expire. Default: `30`
-- `idleTime`: duration of the session while idle (in minutes). A falsy value (`0`, `false`) means the session will not expire by idle time. Default: `20`
+- `sessionDuration`: duration of the session (in minutes). A falsy value (`0`, `false`) means the session will not be forced to expire (it will expire when/if token expires instead). Default: `0`
+- `idleTime`: duration of the session while idle (in minutes). A falsy value (`0`, `false`) means the session will not expire by idle time. Default: `0`
 - `accessTokenKey`: access token key for calls to the API (necessary for resource authentication in tokenAuthResource). Default: `'accessToken'`
+- `jwt`: if tokens should be treated as [jwt](https://jwt.io) tokens for the purposes of expiration handling.
 
 # API
 
@@ -89,6 +90,12 @@ bower install angular-token-authentication --save
 ```
 
 Include the files, load the modules on the app and set parameters:
+
+```html
+<!--if using jwt-->
+<script src="bower_components/angular-jwt/dist/angular-jwt.min.js"></script>
+<script src="bower_components/angular-token-authentication/angular-token-authentication.js"></script>
+```
 
 ```javascript
 angular.module("AppModule", ["tokenAuthResource"]) //should be enough to load both modules (it depends on tokenAuthentication)

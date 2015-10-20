@@ -16,6 +16,7 @@
   "homepage": "https://github.com/Yeti-Media/angular-token-authentication.git",
   "main": "angular-token-authentication.js",
   "dependencies": {
+    "angular-jwt": "~0.0.9",
     "angular-resource": "~1.2.9"
   },
   "devDependencies": {
