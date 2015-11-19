@@ -81,6 +81,13 @@ describe("sessionHandler", function() {
       h.setValue("accessToken", nonExpToken);
       expect(setExpirationCalled).toEqual(true);
     });
+
+    it("should save the refresh token when setting access token if present", function() {
+      var h = handler();
+      h.setValue("accessToken", angular.extend(nonExpToken, {refresh_token: "refreshing"}));
+
+      expect(JSON.parse(storage.tokenAuth_session).refreshToken).toEqual({value: "refreshing", remember: false});
+    });
   });
 
   describe("setExpiration()", function() {
@@ -151,18 +158,12 @@ describe("sessionHandler", function() {
       expect(handler().checkExpiration()).toEqual(false);
     });
 
-    it("returns true and cleans session if expiration is met", function() {
+    it("returns true if expiration is met", function() {
       var date = new Date(),
-      cleanWasCalled = false,
       h = handler();
-
-      h.clean = function() {
-        cleanWasCalled = true;
-      };
 
       storage.tokenAuth_expiration = date.getTime() - 1;
       expect(h.checkExpiration()).toEqual(true);
-      expect(cleanWasCalled).toEqual(true);
     });
   });
 
