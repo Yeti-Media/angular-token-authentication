@@ -8,12 +8,13 @@ tokenAuthentication.value("tokenAuthParams", {
   sessionDuration: 0, // in minutes
   idleTime: 0, //in minutes
   accessTokenKey: "accessToken",
-  jwt: false
+  jwt: false,
+  refreshToken: false
 });
 
 
 angular.module("tokenAuthentication").factory("sessionHandler",
-  ["$rootScope", "$window", "tokenAuthParams", function($scope, $window, tokenAuthParams, jwtHelper) {
+  ["$rootScope", "$window", "tokenAuthParams", "jwtHelper", function($scope, $window, tokenAuthParams, jwtHelper) {
     var accessTokenKey = "accessToken",
     storage = $window.sessionStorage,
     getKey = function(key) {
@@ -35,6 +36,9 @@ angular.module("tokenAuthentication").factory("sessionHandler",
           this.setExpiration(value);
           this.setIdleTimer();
           $scope.$broadcast("tokenAuth:loggedIn");
+          if (value.refresh_token) {
+            this.setValue('refreshToken', value.refresh_token);
+          }
           value = value.access_token;
         } else if (this.empty()) {
           this.setExpiration();
@@ -66,6 +70,10 @@ angular.module("tokenAuthentication").factory("sessionHandler",
 
       getAccessToken: function() {
         return this.getValue(accessTokenKey);
+      },
+
+      getRefreshToken: function() {
+        return this.getValue("refreshToken");
       },
 
       setExpiration: function(token) {
@@ -100,7 +108,6 @@ angular.module("tokenAuthentication").factory("sessionHandler",
         var date = new Date();
 
         if (storage.tokenAuth_expiration && parseInt(storage.tokenAuth_expiration, 10) < date.getTime()) {
-          this.clean();
           return true;
         } else {
           return false;
@@ -162,7 +169,7 @@ angular.module("tokenAuthentication").factory("sessionHandler",
 
 
 angular.module("tokenAuthResource", ["ngResource", "tokenAuthentication"]).factory("tokenAuthResource",
-  ["$resource", "sessionHandler", "tokenAuthParams", function($resource, sessionHandler, tokenAuthParams) {
+  ["$resource", "sessionHandler", "tokenAuthParams", "$http", function($resource, sessionHandler, tokenAuthParams, $http) {
     return function() {
       var resource = $resource.apply(this, arguments),
       actions = ["get", "save", "query", "remove", "delete"];
@@ -179,8 +186,7 @@ angular.module("tokenAuthResource", ["ngResource", "tokenAuthentication"]).facto
 
         resource[action] = function() {
           var args = Array.prototype.slice.call(arguments);
-
-          if (!sessionHandler.checkExpiration()) {
+          var doIt = function() {
             if (args.length === 0)
               args.push({});
             else if (typeof args[0] !== "object")
@@ -189,6 +195,19 @@ angular.module("tokenAuthResource", ["ngResource", "tokenAuthentication"]).facto
             args[0][tokenAuthParams.accessTokenKey] = sessionHandler.getAccessToken();
 
             original.apply(this, args);
+          };
+
+          if (sessionHandler.checkExpiration()) {
+            if (tokenAuthParams.refreshToken) {
+              var requestConfig = angular.copy(tokenAuthParams.refreshTokenRequest);
+              requestConfig.data = requestConfig.data(sessionHandler.getRefreshToken());
+              $http(requestConfig).then(function(response) {
+                sessionHandler.setAccessToken(response.data);
+                doIt();
+              });
+            }
+          } else {
+            doIt();
           }
         };
       });

@@ -10,6 +10,8 @@ Angular token authentication are services for handling token-based authenticatio
 - `idleTime`: duration of the session while idle (in minutes). A falsy value (`0`, `false`) means the session will not expire by idle time. Default: `0`
 - `accessTokenKey`: access token key for calls to the API (necessary for resource authentication in tokenAuthResource). Default: `'accessToken'`
 - `jwt`: if tokens should be treated as [jwt](https://jwt.io) tokens for the purposes of expiration handling.
+- `refreshToken`: whether a refresh token should be used automatically with the tokenAuthResource service after token expiration.
+- `refreshTokenRequest`: http request config object for requesting refresh tokens. Usage of the [$http service] (https://docs.angularjs.org/api/ng/service/$http#usage) applies except for the data property, it being a function of the refresh token. Refer to [the example implementation](https://github.com/yeti-media/angular-token-authentication/blob/master/example/app.js#L8) for clarification.
 
 # API
 
